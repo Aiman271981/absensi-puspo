@@ -1224,18 +1224,11 @@ function simpanAkunKaryawanAdmin(targetId){
     }
   }
 })();
-  let elemFocusTarget = null;
-
-document.addEventListener('focusin', function(e){
-  if (e.target.tagName === 'INPUT') {
-    elemFocusTarget = e.target;
-  }
-});
-
-if (window.visualViewport) {
+  if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', function(){
-    if (elemFocusTarget) {
-      elemFocusTarget.scrollIntoView({behavior: 'smooth', block: 'center'});
+    const active = document.activeElement;
+    if (active && active.tagName === 'INPUT') {
+      active.scrollIntoView({behavior: 'smooth', block: 'center'});
     }
   });
 }
