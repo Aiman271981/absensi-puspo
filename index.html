@@ -1240,37 +1240,36 @@ function refreshCurrentScreen(){
     else { loadLaporan(); }
   }
 }
-
 (function setupPullToRefresh(){
   const indicator = document.getElementById('ptrIndicator');
   const ptrText = document.getElementById('ptrText');
   const spinner = document.getElementById('ptrSpinner');
-  let startY = 0, pulling = false, refreshing = false;
+  let startY = 0, pulling = false, refreshing = false, pullDistance = 0;
   const THRESHOLD = 70;
 
   document.addEventListener('touchstart', function(e){
-    if(!currentUser) return;
-    pulling = window.scrollY === 0 && !refreshing;
-    if(pulling) startY = e.touches[0].clientY;
+    if(!currentUser || refreshing) return;
+    if((window.scrollY || document.documentElement.scrollTop || 0) <= 0){
+      pulling = true;
+      startY = e.touches[0].clientY;
+    }
   }, { passive: true });
 
   document.addEventListener('touchmove', function(e){
     if(!pulling || refreshing) return;
     const diff = e.touches[0].clientY - startY;
-    if(diff > 0 && window.scrollY === 0){
-      const dist = Math.min(diff * 0.5, 100);
-      indicator.style.transform = 'translate(-50%, ' + (dist - 60) + 'px)';
-      ptrText.textContent = dist > THRESHOLD ? 'Lepas untuk refresh' : 'Tarik untuk refresh';
+    if(diff > 0){
+      pullDistance = Math.min(diff * 0.5, 100);
+      indicator.style.transform = 'translate(-50%, ' + (pullDistance - 60) + 'px)';
+      ptrText.textContent = pullDistance > THRESHOLD ? 'Lepas untuk refresh' : 'Tarik untuk refresh';
     }
   }, { passive: true });
 
   document.addEventListener('touchend', function(){
-    if(!pulling || refreshing){ pulling = false; return; }
-    const match = /translate\(-50%, ([\-\d.]+)px\)/.exec(indicator.style.transform);
-    const dist = match ? parseFloat(match[1]) + 60 : 0;
+    if(!pulling) return;
     pulling = false;
 
-    if(dist > THRESHOLD){
+    if(pullDistance > THRESHOLD && !refreshing){
       refreshing = true;
       indicator.style.transform = 'translate(-50%, 10px)';
       ptrText.textContent = 'Memuat…';
@@ -1284,8 +1283,10 @@ function refreshCurrentScreen(){
     } else {
       indicator.style.transform = 'translate(-50%, -60px)';
     }
+    pullDistance = 0;
   });
 })();
+
 /* ---------- AUTO LOGIN ---------- */
 (function tryAutoLogin(){
   const saved = localStorage.getItem('absensi_user');
