@@ -1,0 +1,15 @@
+{
+  "name": "Sistem Absensi",
+  "short_name": "Absensi",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5efe0",
+  "theme_color": "#1f4d3d",
+  "icons": [
+    {
+      "src": "https://drive.google.com/uc?export=view&id=11hwPfoad68ZtVqMUcMqS6Vcrc2i8EAO8",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
