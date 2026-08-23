@@ -261,6 +261,10 @@
 </head>
 <body>
 <div class="wrap">
+  <div id="ptrIndicator" style="position:fixed; top:0; left:50%; transform:translate(-50%,-60px); z-index:999; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:8px 16px; font-size:12px; color:var(--primary); font-weight:700; box-shadow:0 4px 12px -4px rgba(0,0,0,.15); transition:transform .2s; display:flex; align-items:center; gap:6px;">
+    <span id="ptrSpinner" style="display:inline-block; width:13px; height:13px; border:2px solid var(--primary-soft); border-top-color:var(--primary); border-radius:50%;"></span>
+    <span id="ptrText">Tarik untuk refresh</span>
+  </div>
 
   <div class="topbar">
     <div class="motif-bg"></div>
@@ -1223,7 +1227,65 @@ function simpanAkunKaryawanAdmin(targetId){
     })
     .ubahAkunKaryawanAdmin(currentUser.id, targetId, usernameBaru, passwordBaru || null);
 }
+/* ---------- PULL TO REFRESH ---------- */
+function refreshCurrentScreen(){
+  if(document.getElementById('absenScreen').classList.contains('active')){
+    refreshStatusHariIni();
+    requestLocation();
+  } else if(document.getElementById('riwayatScreen').classList.contains('active')){
+    loadHistory();
+  } else if(document.getElementById('laporanScreen').classList.contains('active')){
+    if(laporanMode === 'bulanan'){ loadLaporanBulanan(); loadDaftarLibur(); }
+    else if(laporanMode === 'akun'){ loadDaftarKaryawanAdmin(); }
+    else { loadLaporan(); }
+  }
+}
 
+(function setupPullToRefresh(){
+  const indicator = document.getElementById('ptrIndicator');
+  const ptrText = document.getElementById('ptrText');
+  const spinner = document.getElementById('ptrSpinner');
+  let startY = 0, pulling = false, refreshing = false;
+  const THRESHOLD = 70;
+
+  document.addEventListener('touchstart', function(e){
+    if(!currentUser) return;
+    pulling = window.scrollY === 0 && !refreshing;
+    if(pulling) startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e){
+    if(!pulling || refreshing) return;
+    const diff = e.touches[0].clientY - startY;
+    if(diff > 0 && window.scrollY === 0){
+      const dist = Math.min(diff * 0.5, 100);
+      indicator.style.transform = 'translate(-50%, ' + (dist - 60) + 'px)';
+      ptrText.textContent = dist > THRESHOLD ? 'Lepas untuk refresh' : 'Tarik untuk refresh';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(){
+    if(!pulling || refreshing){ pulling = false; return; }
+    const match = /translate\(-50%, ([\-\d.]+)px\)/.exec(indicator.style.transform);
+    const dist = match ? parseFloat(match[1]) + 60 : 0;
+    pulling = false;
+
+    if(dist > THRESHOLD){
+      refreshing = true;
+      indicator.style.transform = 'translate(-50%, 10px)';
+      ptrText.textContent = 'Memuat…';
+      spinner.style.animation = 'spin .6s linear infinite';
+      refreshCurrentScreen();
+      setTimeout(function(){
+        refreshing = false;
+        indicator.style.transform = 'translate(-50%, -60px)';
+        spinner.style.animation = '';
+      }, 900);
+    } else {
+      indicator.style.transform = 'translate(-50%, -60px)';
+    }
+  });
+})();
 /* ---------- AUTO LOGIN ---------- */
 (function tryAutoLogin(){
   const saved = localStorage.getItem('absensi_user');
