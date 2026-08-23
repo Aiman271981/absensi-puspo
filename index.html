@@ -1224,13 +1224,21 @@ function simpanAkunKaryawanAdmin(targetId){
     }
   }
 })();
-  document.addEventListener('focusin', function(e){
+  let elemFocusTarget = null;
+
+document.addEventListener('focusin', function(e){
   if (e.target.tagName === 'INPUT') {
-    setTimeout(function(){
-      e.target.scrollIntoView({behavior: 'smooth', block: 'center'});
-    }, 300);
+    elemFocusTarget = e.target;
   }
 });
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function(){
+    if (elemFocusTarget) {
+      elemFocusTarget.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+  });
+}
 </script>
 
 </body>
