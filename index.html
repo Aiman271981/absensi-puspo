@@ -36,6 +36,15 @@
       --radius-sm:10px;
     }
     *{box-sizing:border-box;}
+    body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
     html,body{margin:0;padding:0;}
     body{
       background:var(--paper);
@@ -1256,14 +1265,15 @@ function refreshCurrentScreen(){
   }, { passive: true });
 
   document.addEventListener('touchmove', function(e){
-    if(!pulling || refreshing) return;
-    const diff = e.touches[0].clientY - startY;
-    if(diff > 0){
-      pullDistance = Math.min(diff * 0.5, 100);
-      indicator.style.transform = 'translate(-50%, ' + (pullDistance - 60) + 'px)';
-      ptrText.textContent = pullDistance > THRESHOLD ? 'Lepas untuk refresh' : 'Tarik untuk refresh';
-    }
-  }, { passive: true });
+  if(!pulling || refreshing) return;
+  const diff = e.touches[0].clientY - startY;
+  if(diff > 0){
+    e.preventDefault();
+    pullDistance = Math.min(diff * 0.5, 100);
+    indicator.style.transform = 'translate(-50%, ' + (pullDistance - 60) + 'px)';
+    ptrText.textContent = pullDistance > THRESHOLD ? 'Lepas untuk refresh' : 'Tarik untuk refresh';
+  }
+}, { passive: false });
 
   document.addEventListener('touchend', function(){
     if(!pulling) return;
