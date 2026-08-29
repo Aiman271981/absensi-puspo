@@ -525,20 +525,24 @@ input, textarea {
         <input type="month" id="laporanBulan" onchange="loadLaporanBulanan(); loadDaftarLibur();">
       </div>
 
-      <div class="rekap-card" id="liburCard">
-        <div class="rekap-nama" style="margin-bottom:10px;">📅 Hari Libur Custom Bulan Ini</div>
-        <div id="liburList"></div>
-        <div class="field" style="text-align:left; margin-top:12px;">
-          <label>Tanggal Libur</label>
-          <input type="date" id="liburTanggalBaru">
-        </div>
-        <div class="field" style="text-align:left;">
-          <label>Keterangan</label>
-          <input type="text" id="liburKeteranganBaru" placeholder="Contoh: Cuti Bersama, Libur Nasional">
-        </div>
-        <button class="ghost" onclick="tambahHariLibur()">+ Tambah Hari Libur</button>
-        <div class="result-msg" id="liburResultMsg"></div>
-      </div>
+         <div class="rekap-card" id="liburCard">
+     <div class="rekap-nama" style="margin-bottom:10px;">📅 Hari Libur Custom Bulan Ini</div>
+     <div id="liburList"></div>
+     <button class="ghost" id="btnTambahLiburToggle" onclick="bukaFormLibur()" style="margin-top:12px;">+ Tambah Hari Libur</button>
+     <div id="liburFormWrap" class="hide" style="margin-top:12px;">
+       <div class="field" style="text-align:left;">
+         <label>Tanggal Libur</label>
+         <input type="date" id="liburTanggalBaru">
+       </div>
+       <div class="field" style="text-align:left;">
+         <label>Keterangan</label>
+         <input type="text" id="liburKeteranganBaru" placeholder="Contoh: Cuti Bersama, Libur Nasional">
+       </div>
+       <button class="primary" onclick="tambahHariLibur()">Simpan</button>
+       <button class="ghost" onclick="tutupFormLibur()">Batal</button>
+       <div class="result-msg" id="liburResultMsg"></div>
+     </div>
+   </div>
 
       <button class="ghost" id="btnExportExcel" onclick="exportLaporanBulananExcel()" style="margin-bottom:16px;">⬇️ Export ke Excel</button>
       <div id="laporanBulananList"></div>
@@ -1118,7 +1122,7 @@ function switchLaporanMode(mode){
   document.getElementById('laporanHarianWrap').classList.toggle('hide', mode !== 'harian');
   document.getElementById('laporanBulananWrap').classList.toggle('hide', mode !== 'bulanan');
   document.getElementById('laporanAkunWrap').classList.toggle('hide', mode !== 'akun');
-  if(mode === 'bulanan'){ loadLaporanBulanan(); loadDaftarLibur(); }
+    if(mode === 'bulanan'){ loadLaporanBulanan(); loadDaftarLibur(); tutupFormLibur(); }
   else if(mode === 'akun'){ loadDaftarKaryawanAdmin(); }
   else { loadLaporan(); }
 }
@@ -1238,6 +1242,19 @@ function loadDaftarLibur(){
     .getDaftarLibur(currentUser.id, bulanInput.value);
 }
 
+   function bukaFormLibur(){
+     document.getElementById('liburFormWrap').classList.remove('hide');
+     document.getElementById('btnTambahLiburToggle').classList.add('hide');
+     document.getElementById('liburTanggalBaru').value = '';
+     document.getElementById('liburKeteranganBaru').value = '';
+     document.getElementById('liburResultMsg').className = 'result-msg';
+     document.getElementById('liburResultMsg').textContent = '';
+   }
+
+   function tutupFormLibur(){
+     document.getElementById('liburFormWrap').classList.add('hide');
+     document.getElementById('btnTambahLiburToggle').classList.remove('hide');
+   }  
 function tambahHariLibur(){
   const tanggal = document.getElementById('liburTanggalBaru').value;
   const keterangan = document.getElementById('liburKeteranganBaru').value.trim();
@@ -1257,6 +1274,7 @@ function tambahHariLibur(){
         document.getElementById('liburKeteranganBaru').value = '';
         loadDaftarLibur();
         loadLaporanBulanan();
+        tutupFormLibur();
       }
     })
     .withFailureHandler(err => {
