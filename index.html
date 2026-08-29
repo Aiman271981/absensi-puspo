@@ -1006,7 +1006,7 @@ function loadHistory(){
     .withFailureHandler(err => {
       list.innerHTML = '<div class="empty-state">Gagal memuat riwayat: ' + err.message + '</div>';
     })
-    .getHistory(currentUser.id, 30);
+    .getHistory(currentUser.id);
 }
 
 /* ---------- IJIN ---------- */
