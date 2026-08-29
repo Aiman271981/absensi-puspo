@@ -258,6 +258,42 @@ input, textarea {
     .rekap-item.bad .n{color:var(--bad);}
     .rekap-item.warn .n{color:var(--warn);}
     .rekap-summary{font-size:12px; color:var(--muted); margin-bottom:12px; text-align:center;}
+       .laporan-table-wrap{
+     overflow-x:auto;
+     -webkit-overflow-scrolling:touch;
+     border:1px solid var(--line);
+     border-radius:var(--radius-md);
+     background:var(--card);
+     margin-bottom:16px;
+   }
+   .laporan-table{
+     width:100%;
+     border-collapse:collapse;
+     font-size:12px;
+     white-space:nowrap;
+   }
+   .laporan-table th, .laporan-table td{
+     padding:10px 10px;
+     text-align:center;
+     border-bottom:1px solid var(--line);
+   }
+   .laporan-table th{
+     background:var(--primary-soft);
+     color:var(--primary);
+     font-size:10px;
+     text-transform:uppercase;
+     letter-spacing:.04em;
+     font-weight:800;
+   }
+   .laporan-table td.laporan-td-nama{
+     text-align:left;
+     font-weight:700;
+     color:var(--ink);
+   }
+   .laporan-table tbody tr:last-child td{ border-bottom:none; }
+   .laporan-table td.ok{ color:var(--ok); font-weight:700; }
+   .laporan-table td.bad{ color:var(--bad); font-weight:700; }
+   .laporan-table td.warn{ color:var(--warn); font-weight:700; }
 
     .spinner{
       width:18px; height:18px; border:2.5px solid rgba(255,255,255,.4);
@@ -1073,46 +1109,61 @@ function switchLaporanMode(mode){
   else { loadLaporan(); }
 }
 
-function loadLaporanBulanan(){
-  const list = document.getElementById('laporanBulananList');
-  const bulanInput = document.getElementById('laporanBulan');
-  if(!bulanInput.value) bulanInput.value = new Date().toISOString().slice(0,7);
+   function loadLaporanBulanan(){
+     const list = document.getElementById('laporanBulananList');
+     const bulanInput = document.getElementById('laporanBulan');
+     if(!bulanInput.value) bulanInput.value = new Date().toISOString().slice(0,7);
 
-  list.innerHTML = '<div class="empty-state"><span class="spinner" style="border-top-color:#1f4d3d; border-color:rgba(31,77,61,.25)"></span>Memuat rekap…</div>';
+     list.innerHTML = '<div class="empty-state"><span class="spinner" style="border-top-color:#1f4d3d; border-color:rgba(31,77,61,.25)"></span>Memuat rekap…</div>';
 
-  google.script.run
-    .withSuccessHandler(res => {
-      if(!res.success){
-        list.innerHTML = '<div class="empty-state">' + res.message + '</div>';
-        return;
-      }
-      if(!res.data.length){
-        list.innerHTML = '<div class="empty-state">Tidak ada data karyawan aktif.</div>';
-        return;
-      }
-      dataLaporanBulananTerakhir = res.data;
-      bulanLaporanTerakhir = res.bulan;
-      const ringkasan = '<div class="rekap-summary">Total hari kerja bulan ini: ' + res.totalHariKerja + ' hari</div>';
-      list.innerHTML = ringkasan + res.data.map(r => `
-        <div class="rekap-card">
-          <div class="rekap-nama">${r.nama}</div>
-          <div class="rekap-tipe">${r.tipe}</div>
-          <div class="rekap-grid">
-            <div class="rekap-item ok"><div class="n">${r.tepatMasuk}</div><div class="l">Masuk Tepat</div></div>
-            <div class="rekap-item bad"><div class="n">${r.telatMasuk}</div><div class="l">Telat</div></div>
-            <div class="rekap-item warn"><div class="n">${r.pulangAwal}</div><div class="l">Pulang Awal</div></div>
-            <div class="rekap-item ok"><div class="n">${r.tepatPulang}</div><div class="l">Pulang Tepat</div></div>
-            <div class="rekap-item bad"><div class="n">${r.alpa}</div><div class="l">Alpa</div></div>
-            <div class="rekap-item"><div class="n">${r.ijin}</div><div class="l">Ijin</div></div>
-          </div>
-        </div>
-      `).join('');
-    })
-    .withFailureHandler(err => {
-      list.innerHTML = '<div class="empty-state">Gagal memuat rekap: ' + err.message + '</div>';
-    })
-    .getLaporanBulanan(currentUser.id, bulanInput.value);
-}
+     google.script.run
+       .withSuccessHandler(res => {
+         if(!res.success){
+           list.innerHTML = '<div class="empty-state">' + res.message + '</div>';
+           return;
+         }
+         if(!res.data.length){
+           list.innerHTML = '<div class="empty-state">Tidak ada data karyawan aktif.</div>';
+           return;
+         }
+         dataLaporanBulananTerakhir = res.data;
+         bulanLaporanTerakhir = res.bulan;
+         const ringkasan = '<div class="rekap-summary">Total hari kerja bulan ini: ' + res.totalHariKerja + ' hari</div>';
+         const barisTabel = res.data.map(r => `
+           <tr>
+             <td class="laporan-td-nama">${r.nama}</td>
+             <td class="ok">${r.tepatMasuk}</td>
+             <td class="ok">${r.tepatPulang}</td>
+             <td class="bad">${r.telatMasuk}</td>
+             <td class="warn">${r.pulangAwal}</td>
+             <td class="bad">${r.alpa}</td>
+             <td>${r.ijin}</td>
+           </tr>
+         `).join('');
+         list.innerHTML = ringkasan + `
+           <div class="laporan-table-wrap">
+             <table class="laporan-table">
+               <thead>
+                 <tr>
+                   <th>NAMA</th>
+                   <th>MASUK TEPAT</th>
+                   <th>PULANG TEPAT</th>
+                   <th>TELAT</th>
+                   <th>PULANG AWAL</th>
+                   <th>ALPA</th>
+                   <th>IJIN</th>
+                 </tr>
+               </thead>
+               <tbody>${barisTabel}</tbody>
+             </table>
+           </div>
+         `;
+       })
+       .withFailureHandler(err => {
+         list.innerHTML = '<div class="empty-state">Gagal memuat rekap: ' + err.message + '</div>';
+       })
+       .getLaporanBulanan(currentUser.id, bulanInput.value);
+   }
 
 let _xlsxSudahDimuat = false;
 function _muatLibraryExcel(callback){
