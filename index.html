@@ -577,6 +577,11 @@ let laporanMode = 'harian';
 let hariIniLibur = false;
 let dataLaporanBulananTerakhir = [];
 let bulanLaporanTerakhir = '';
+  function getTanggalLokal(){
+  const d = new Date();
+  const offsetMs = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offsetMs).toISOString().slice(0,10);
+}
 
 function doLogin(){
   const u = document.getElementById('username').value.trim();
@@ -907,7 +912,7 @@ function loadHistory(){
 /* ---------- IJIN ---------- */
 function bukaFormIjin(){
   document.getElementById('ijinCard').classList.remove('hide');
-  document.getElementById('ijinTanggal').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ijinTanggal').value = getTanggalLokal();
 }
 
 function kirimIjin(){
@@ -944,7 +949,7 @@ function kirimIjin(){
 
 function batalkanIjinSekarang(){
   if(!confirm('Batalkan pengajuan ijin hari ini?')) return;
-  const tanggal = new Date().toISOString().slice(0,10);
+  const tanggal = getTanggalLokal();
   const btnIjin = document.getElementById('btnIjinToggle');
   btnIjin.disabled = true;
   google.script.run
