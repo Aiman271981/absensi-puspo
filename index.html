@@ -387,6 +387,17 @@ input, textarea {
         <div style="font-size:42px; line-height:1;">🌙</div>
         <div style="font-family:'Amiri',serif; font-size:22px; font-weight:700; color:var(--primary); margin-top:14px;">Hari Ini Libur Kawan</div>
       </div>
+      <div id="absenIjinMessage" class="hide" style="padding:30px 0 6px; text-align:left;">
+  <div style="text-align:center; margin-bottom:18px;">
+    <div style="font-size:38px; line-height:1;">📝</div>
+    <div style="font-family:'Amiri',serif; font-size:19px; font-weight:700; color:var(--primary); margin-top:10px;">Hari Ini Anda Ijin</div>
+  </div>
+  <div style="background:var(--paper); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:16px;">
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:4px;">Alasan</div>
+    <div id="ijinAlasanText" style="font-size:14px; color:var(--ink); font-weight:600;">-</div>
+  </div>
+  <button class="ghost" onclick="batalkanIjinSekarang()">❌ Batalkan Ijin</button>
+</div>
     </div>
 
     <div class="action-card hide" id="ijinCard" style="margin-top:16px;">
@@ -844,6 +855,7 @@ function refreshStatusHariIni(){
   document.getElementById('absenLoadingMessage').classList.remove('hide');
   document.getElementById('absenNormalContent').classList.add('hide');
   document.getElementById('absenLiburMessage').classList.add('hide');
+  document.getElementById('absenIjinMessage').classList.add('hide');
 
   google.script.run
     .withSuccessHandler(res => {
@@ -855,19 +867,17 @@ function refreshStatusHariIni(){
       p.className = 'val ' + (res.sudahPulang ? 'done' : 'pending');
       document.getElementById('jenisSelect').value = res.sudahMasuk ? 'Pulang' : 'Masuk';
 
-      const btnIjin = document.getElementById('btnIjinToggle');
-      if(res.sudahIjin){
-        btnIjin.textContent = '❌ Batalkan Ijin';
-        btnIjin.onclick = batalkanIjinSekarang;
-      } else {
-        btnIjin.textContent = '📝 Ajukan Ijin (Tidak Masuk)';
-        btnIjin.onclick = bukaFormIjin;
-      }
-
       hariIniLibur = !!res.hariLibur;
       document.getElementById('absenLoadingMessage').classList.add('hide');
-      document.getElementById('absenNormalContent').classList.toggle('hide', hariIniLibur);
-      document.getElementById('absenLiburMessage').classList.toggle('hide', !hariIniLibur);
+
+      if(hariIniLibur){
+        document.getElementById('absenLiburMessage').classList.remove('hide');
+      } else if(res.sudahIjin){
+        document.getElementById('ijinAlasanText').textContent = res.alasanIjin || '-';
+        document.getElementById('absenIjinMessage').classList.remove('hide');
+      } else {
+        document.getElementById('absenNormalContent').classList.remove('hide');
+      }
       checkReadyToSubmit();
     })
     .withFailureHandler(err => {
