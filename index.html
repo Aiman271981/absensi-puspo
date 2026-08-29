@@ -277,6 +277,20 @@ input, textarea {
      text-align:center;
      border-bottom:1px solid var(--line);
    }
+    .laporan-table th:first-child,
+.laporan-table td:first-child{
+  position:sticky;
+  left:0;
+  z-index:2;
+  box-shadow:1px 0 0 var(--line);
+}
+.laporan-table td.laporan-td-nama{
+  background:var(--card);
+}
+.laporan-table th:first-child{
+  background:var(--primary-soft);
+  z-index:3;
+}
    .laporan-table th{
      background:var(--primary-soft);
      color:var(--primary);
