@@ -807,8 +807,34 @@ function submitAbsen(){
   const resultMsg = document.getElementById('resultMsg');
   resultMsg.className = 'result-msg';
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Mengirim…';
+  btn.innerHTML = '<span class="spinner"></span>Memeriksa lokasi…';
 
+  if(!navigator.geolocation){
+    resultMsg.textContent = 'HP tidak mendukung GPS.';
+    resultMsg.className = 'result-msg bad';
+    checkReadyToSubmit();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      currentCoords = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+      btn.innerHTML = '<span class="spinner"></span>Mengirim…';
+      kirimAbsenKeServer(jenis);
+    },
+    err => {
+      btn.disabled = false;
+      btn.textContent = 'Kirim Absen';
+      resultMsg.textContent = 'Gagal mendapat lokasi terkini. Pastikan GPS aktif, lalu coba lagi.';
+      resultMsg.className = 'result-msg bad';
+    },
+    { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+  );
+}
+
+function kirimAbsenKeServer(jenis){
+  const btn = document.getElementById('btnSubmit');
+  const resultMsg = document.getElementById('resultMsg');
   google.script.run
     .withSuccessHandler(res => {
       btn.disabled = false;
