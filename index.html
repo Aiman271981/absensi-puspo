@@ -586,6 +586,8 @@ let currentPhotoBase64 = null;
 let currentCoords = null;
 let laporanMode = 'harian';
 let hariIniLibur = false;
+let sudahMasukHariIni = false;
+let sudahPulangHariIni = false;
 let dataLaporanBulananTerakhir = [];
 let bulanLaporanTerakhir = '';
   function getTanggalLokal(){
@@ -803,6 +805,11 @@ function checkReadyToSubmit(){
 
 function submitAbsen(){
   const jenis = document.getElementById('jenisSelect').value;
+  const sudahAdaJenisIni = (jenis === 'Masuk' && sudahMasukHariIni) || (jenis === 'Pulang' && sudahPulangHariIni);
+  if(sudahAdaJenisIni){
+    const lanjut = confirm('Anda sudah absen ' + jenis + ' hari ini.\n\nMengirim lagi akan melakukan PERBAIKAN absensi \u2014 data ' + jenis + ' yang lama akan DIHAPUS dan diganti yang baru.\n\nLanjutkan?');
+    if(!lanjut) return;
+  }
   const btn = document.getElementById('btnSubmit');
   const resultMsg = document.getElementById('resultMsg');
   resultMsg.className = 'result-msg';
@@ -892,7 +899,8 @@ function refreshStatusHariIni(){
       p.textContent = res.sudahPulang ? 'Sudah' : 'Belum';
       p.className = 'val ' + (res.sudahPulang ? 'done' : 'pending');
       document.getElementById('jenisSelect').value = res.sudahMasuk ? 'Pulang' : 'Masuk';
-
+      sudahMasukHariIni = res.sudahMasuk;
+      sudahPulangHariIni = res.sudahPulang;
       hariIniLibur = !!res.hariLibur;
       document.getElementById('absenLoadingMessage').classList.add('hide');
 
