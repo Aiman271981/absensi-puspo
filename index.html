@@ -354,7 +354,7 @@ input, textarea {
 
   <!-- ===================== ABSEN ===================== -->
   <div class="screen" id="absenScreen">
-    <div class="action-card">
+    <div class="action-card" id="absenMainCard">
       <div class="motif-line"></div>
       <div id="absenLoadingMessage" style="padding:34px 0 24px;">
   <span class="spinner" style="border-top-color:#1f4d3d; border-color:rgba(31,77,61,.25)"></span>
@@ -413,7 +413,7 @@ input, textarea {
         <input type="text" id="ijinKeterangan" placeholder="Contoh: Sakit, keperluan keluarga">
       </div>
       <button class="primary" onclick="kirimIjin()">Kirim Pengajuan Ijin</button>
-      <button class="ghost" onclick="document.getElementById('ijinCard').classList.add('hide')">Batal</button>
+      <button class="ghost" onclick="tutupFormIjin()">Batal</button>
       <div class="result-msg" id="ijinResultMsg"></div>
     </div>
   </div>
@@ -717,6 +717,8 @@ function doLogout(){
   document.getElementById('topSub').textContent = 'Masuk untuk mulai absen';
   ['loginScreen','wajibGantiScreen','absenScreen','riwayatScreen','laporanScreen','akunScreen'].forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('ijinCard').classList.add('hide');
+  document.getElementById('absenMainCard').classList.remove('hide');
   resetAbsenForm();
 }
 
@@ -955,8 +957,13 @@ function loadHistory(){
 
 /* ---------- IJIN ---------- */
 function bukaFormIjin(){
+  document.getElementById('absenMainCard').classList.add('hide');
   document.getElementById('ijinCard').classList.remove('hide');
   document.getElementById('ijinTanggal').value = getTanggalLokal();
+}
+function tutupFormIjin(){
+  document.getElementById('ijinCard').classList.add('hide');
+  document.getElementById('absenMainCard').classList.remove('hide');
 }
 
 function kirimIjin(){
@@ -976,6 +983,7 @@ function kirimIjin(){
       if(res.success){
         document.getElementById('ijinKeterangan').value = '';
         document.getElementById('ijinCard').classList.add('hide');
+        document.getElementById('absenMainCard').classList.remove('hide');
         refreshStatusHariIni();
       }
     })
